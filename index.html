@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PS Anticheat Dashboard - New Gen RP</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-shield-alt"></i>
+            <h2>PS Anticheat</h2>
+            <span class="version">v2.0.0</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="#violations" class="nav-item" data-page="violations">
+                <i class="fas fa-exclamation-triangle"></i> Violaciones
+            </a>
+            <a href="#bans" class="nav-item" data-page="bans">
+                <i class="fas fa-ban"></i> Bans
+            </a>
+            <a href="#players" class="nav-item" data-page="players">
+                <i class="fas fa-users"></i> Jugadores
+            </a>
+            <a href="#detections" class="nav-item" data-page="detections">
+                <i class="fas fa-radar"></i> Detecciones
+            </a>
+            <a href="#config" class="nav-item" data-page="config">
+                <i class="fas fa-cog"></i> Configuración
+            </a>
+            <a href="#logs" class="nav-item" data-page="logs">
+                <i class="fas fa-file-alt"></i> Logs
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="server-status">
+                <i class="fas fa-circle pulse"></i>
+                <span id="serverStatus">Conectando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <h1 id="pageTitle">Dashboard</h1>
+                <span class="breadcrumb" id="breadcrumb">Inicio / Dashboard</span>
+            </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="globalSearch" placeholder="Buscar jugador, ID...">
+                </div>
+                <button class="btn-icon" id="refreshBtn" title="Refrescar datos">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="btn-icon" id="notificationBtn" title="Notificaciones">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" alt="Admin">
+                    <span>Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page active">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalDetections">0</h3>
+                        <p>Detecciones Hoy</p>
+                        <span class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> 12% vs ayer
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalBans">0</h3>
+                        <p>Bans Activos</p>
+                        <span class="stat-change negative">
+                            <i class="fas fa-arrow-down"></i> 5% vs ayer
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalPlayers">0</h3>
+                        <p>Jugadores Monitoreados</p>
+                        <span class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> 8% vs ayer
+                        </span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="trustScore">98.5%</h3>
+                        <p>Trust Score Promedio</p>
+                        <span class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> 2% vs ayer
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Detecciones por Hora</h3>
+                        <select id="chartTimeRange">
+                            <option>Últimas 24h</option>
+                            <option>Últimos 7 días</option>
+                            <option>Último mes</option>
+                        </select>
+                    </div>
+                    <canvas id="detectionsChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Top Detecciones</h3>
+                    </div>
+                    <canvas id="topDetectionsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <div class="card-header">
+                    <h3>Actividad Reciente</h3>
+                    <button class="btn-text">Ver todo</button>
+                </div>
+                <table class="data-table" id="recentActivityTable">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Jugador</th>
+                            <th>Tipo</th>
+                            <th>Detección</th>
+                            <th>Nivel</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="no-data">
+                                <i class="fas fa-inbox"></i>
+                                <p>Cargando datos...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Violations Page -->
+        <div id="page-violations" class="page">
+            <div class="page-controls">
+                <div class="filters">
+                    <select id="violationTypeFilter">
+                        <option value="">Todos los tipos</option>
+                        <option value="aimbot">Aimbot</option>
+                        <option value="noclip">Noclip</option>
+                        <option value="godmode">Godmode</option>
+                        <option value="speedhack">Speedhack</option>
+                        <option value="teleport">Teleport</option>
+                        <option value="weapon_mod">Weapon Mod</option>
+                        <option value="esp">ESP</option>
+                        <option value="injection">Injection</option>
+                    </select>
+                    <select id="violationSeverityFilter">
+                        <option value="">Todos los niveles</option>
+                        <option value="critical">Crítico</option>
+                        <option value="high">Alto</option>
+                        <option value="medium">Medio</option>
+                        <option value="low">Bajo</option>
+                    </select>
+                    <input type="date" id="violationDateFilter">
+                </div>
+                <button class="btn-primary" id="exportViolationsBtn">
+                    <i class="fas fa-download"></i> Exportar
+                </button>
+            </div>
+            <table class="data-table" id="violationsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha/Hora</th>
+                        <th>Jugador</th>
+                        <th>Tipo</th>
+                        <th>Detalles</th>
+                        <th>Nivel</th>
+                        <th>Acción Tomada</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay violaciones registradas</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bans Page -->
+        <div id="page-bans" class="page">
+            <div class="page-controls">
+                <div class="filters">
+                    <select id="banStatusFilter">
+                        <option value="active">Activos</option>
+                        <option value="expired">Expirados</option>
+                        <option value="permanent">Permanentes</option>
+                    </select>
+                    <input type="text" id="banSearchInput" placeholder="Buscar por nombre, ID, HWID...">
+                </div>
+                <button class="btn-primary" id="manualBanBtn">
+                    <i class="fas fa-user-slash"></i> Ban Manual
+                </button>
+            </div>
+            <table class="data-table" id="bansTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Jugador</th>
+                        <th>Identificadores</th>
+                        <th>Motivo</th>
+                        <th>Fecha Ban</th>
+                        <th>Expira</th>
+                        <th>Admin</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay bans registrados</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Players Page -->
+        <div id="page-players" class="page">
+            <div class="page-controls">
+                <div class="filters">
+                    <select id="playerTrustFilter">
+                        <option value="">Todos</option>
+                        <option value="high">Trust Alto (>80)</option>
+                        <option value="medium">Trust Medio (50-80)</option>
+                        <option value="low">Trust Bajo (<50)</option>
+                    </select>
+                    <input type="text" id="playerSearchInput" placeholder="Buscar jugador...">
+                </div>
+            </div>
+            <table class="data-table" id="playersTable">
+                <thead>
+                    <tr>
+                        <th>Jugador</th>
+                        <th>Identificadores</th>
+                        <th>Trust Score</th>
+                        <th>Violaciones</th>
+                        <th>Tiempo Jugado</th>
+                        <th>Última Conexión</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay jugadores registrados</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Detections Page -->
+        <div id="page-detections" class="page">
+            <div class="detections-grid">
+                <!-- Detection cards will be generated dynamically -->
+            </div>
+        </div>
+
+        <!-- Config Page -->
+        <div id="page-config" class="page">
+            <div class="config-container">
+                <div class="config-section">
+                    <h3>Configuración General</h3>
+                    <div class="config-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Los cambios requieren reiniciar el recurso para aplicarse</p>
+                    </div>
+                    <div id="configForm">
+                        <!-- Config options will be generated dynamically -->
+                        <p class="text-muted">Cargando configuración...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Page -->
+        <div id="page-logs" class="page">
+            <div class="page-controls">
+                <div class="filters">
+                    <select id="logLevelFilter">
+                        <option value="">Todos los niveles</option>
+                        <option value="error">Error</option>
+                        <option value="warning">Warning</option>
+                        <option value="info">Info</option>
+                        <option value="debug">Debug</option>
+                    </select>
+                    <input type="datetime-local" id="logDateFilter">
+                </div>
+                <button class="btn-primary" id="clearLogsBtn">
+                    <i class="fas fa-trash"></i> Limpiar Logs
+                </button>
+            </div>
+            <div class="logs-container" id="logsContainer">
+                <div class="log-entry info">
+                    <span class="log-time">00:00:00</span>
+                    <span class="log-level">INFO</span>
+                    <span class="log-message">Sistema de logs iniciado...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Manual Ban -->
+    <div id="manualBanModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ban Manual</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Identificador del Jugador</label>
+                    <input type="text" id="banPlayerIdentifier" placeholder="steam:xxxxx, discord:xxxxx, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Motivo del Ban</label>
+                    <textarea id="banReason" rows="3" placeholder="Describe el motivo..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Duración</label>
+                    <select id="banDuration">
+                        <option value="3600">1 Hora</option>
+                        <option value="86400">1 Día</option>
+                        <option value="604800">7 Días</option>
+                        <option value="2592000">30 Días</option>
+                        <option value="0">Permanente</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary modal-close">Cancelar</button>
+                <button class="btn-danger" id="confirmBanBtn">Confirmar Ban</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/violations.js"></script>
+    <script src="js/bans.js"></script>
+    <script src="js/players.js"></script>
+    <script src="js/detections.js"></script>
+    <script src="js/logs.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

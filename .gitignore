@@ -1,0 +1,22 @@
+# Archivos de desarrollo
+node_modules/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Archivos de configuración sensibles
+config_local.js
+.env
+
+# Archivos de caché
+.cache/
+dist/
+
+# Archivos del editor
+.vscode/
+.idea/
+*.sublime-*
+
+# Archivos de sistema
+desktop.ini
