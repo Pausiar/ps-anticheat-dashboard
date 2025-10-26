@@ -204,8 +204,13 @@ function handleLogin(event) {
     return false;
 }
 
-// Verificar sesión al cargar
+// Verificar sesión al cargar (SOLO en login.html)
 window.addEventListener('DOMContentLoaded', () => {
+    // Solo ejecutar si estamos en login.html
+    if (!window.location.pathname.includes('login.html')) {
+        return;
+    }
+    
     // Verificar si ya hay una sesión activa
     const sessionData = localStorage.getItem('ps_session');
     if (sessionData) {
@@ -234,30 +239,3 @@ window.addEventListener('DOMContentLoaded', () => {
         updateLockoutTimer(lockStatus.remainingTime);
     }
 });
-
-// Prevenir acceso directo al dashboard sin login
-window.checkAuth = function() {
-    const sessionData = localStorage.getItem('ps_session');
-    
-    if (!sessionData) {
-        window.location.href = 'login.html';
-        return false;
-    }
-    
-    try {
-        const session = JSON.parse(sessionData);
-        const timeSinceLogin = Date.now() - session.timestamp;
-        
-        if (!session.authenticated || timeSinceLogin >= AUTH_CONFIG.sessionTime) {
-            localStorage.removeItem('ps_session');
-            window.location.href = 'login.html';
-            return false;
-        }
-        
-        return true;
-    } catch (e) {
-        localStorage.removeItem('ps_session');
-        window.location.href = 'login.html';
-        return false;
-    }
-};

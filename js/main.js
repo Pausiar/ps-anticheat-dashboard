@@ -43,6 +43,31 @@ document.addEventListener('click', (e) => {
  * Inicializa la aplicación
  */
 document.addEventListener('DOMContentLoaded', () => {
+    // Verificar autenticación PRIMERO
+    const sessionData = localStorage.getItem('ps_session');
+    
+    if (!sessionData) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    try {
+        const session = JSON.parse(sessionData);
+        const timeSinceLogin = Date.now() - session.timestamp;
+        
+        // Verificar si la sesión ha expirado (24 horas)
+        if (!session.authenticated || timeSinceLogin >= 86400000) {
+            localStorage.removeItem('ps_session');
+            window.location.href = 'login.html';
+            return;
+        }
+    } catch (e) {
+        localStorage.removeItem('ps_session');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    // Si llegamos aquí, la sesión es válida
     console.log('🚀 PS Anticheat Dashboard v2.0.0');
     
     initNavigation();
