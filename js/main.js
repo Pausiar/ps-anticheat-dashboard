@@ -10,6 +10,36 @@ const AppState = {
 };
 
 /**
+ * Cerrar sesión
+ */
+function logout() {
+    if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+        localStorage.removeItem('ps_session');
+        window.location.href = 'login.html';
+    }
+}
+
+/**
+ * Toggle menú de usuario
+ */
+function toggleUserMenu() {
+    const menu = document.getElementById('userMenu');
+    if (menu) {
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// Cerrar menú al hacer clic fuera
+document.addEventListener('click', (e) => {
+    const userProfile = document.querySelector('.user-profile');
+    const userMenu = document.getElementById('userMenu');
+    
+    if (userMenu && !userProfile?.contains(e.target)) {
+        userMenu.style.display = 'none';
+    }
+});
+
+/**
  * Inicializa la aplicación
  */
 document.addEventListener('DOMContentLoaded', () => {
